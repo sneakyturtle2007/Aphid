@@ -1,12 +1,14 @@
 import javax.swing.* ;
 import java.awt.* ;
+import java.awt.datatransfer.*;
 
 public class AphidGUI {
 
 // Storage model
-private static DefaultListModel<String> aphidModel = new DefaultListModel<>() ;
+private static DefaultListModel<String> aphidModel = new DefaultListModel<>();
 
-public static void main(String[] args) {
+public static void main(String[] args) 
+{
 
 // Frames
 	JFrame frame = new JFrame("Aphid Storage Manager");
@@ -21,7 +23,6 @@ public static void main(String[] args) {
 // Title
 	JLabel titleLabel = new JLabel("Aphid Storage Manager", JLabel.CENTER);
 	titleLabel.setFont(new Font("Comic Sans MS", Font.BOLD, 18));
-	frame.add(titleLabel, BorderLayout());
 	
     titleLabel.setOpaque(true);
     titleLabel.setBackground(backgroundGreen);
@@ -80,11 +81,86 @@ public static void main(String[] args) {
 
     frame.add(bottomPanel, BorderLayout.SOUTH);
 
-    frame.setVisible(true);}
+    frame.setVisible(true);
 
-
-private static Object BorderLayout() {
-	// TODO Auto-generated method stub
-	return null;
-}
+aphidList.setDragEnabled(true);
+aphidList.setDropMode(DropMode.INSERT);
+aphidList.setTransferHandler(new TransferHandler() 
+	{
+	
+	    private int fromIndex = -1; 
+	
+	    @Override
+	    protected Transferable createTransferable(JComponent c) {
+	        JList<?> list = (JList<?>) c;
+	        fromIndex = list.getSelectedIndex();
+	
+	        if (fromIndex < 0) 
+	        {
+	            return null;
+	        }
+	
+	        Object value = list.getSelectedValue();
+	        return new StringSelection(value.toString());
+	    }
+	
+	    @Override
+	    public int getSourceActions(JComponent c) {
+	        return MOVE;
+	    }
+	
+	    @Override
+	    public boolean canImport(TransferSupport support) {
+	        return support.isDrop()
+	                && support.isDataFlavorSupported(DataFlavor.stringFlavor);
+	    }
+	
+	    @Override
+	    public boolean importData(TransferSupport support) 
+		    {
+			        if (!canImport(support) || fromIndex < 0) 
+			        {
+			            return false;
+			        }
+			
+			        try 
+			        {
+			            JList.DropLocation location =
+			                    (JList.DropLocation) support.getDropLocation();
+			            int toIndex = location.getIndex();
+			
+			            // Prevent index out of bounds
+			            if (toIndex < 0 || toIndex > aphidModel.size()) 
+			            {
+			                return false;
+			            }
+			
+			            String data = (String) support.getTransferable()
+			                    .getTransferData(DataFlavor.stringFlavor);
+			
+			            // Adjust index if moving downward
+			            if (fromIndex < toIndex) 
+			            {
+			                toIndex--;
+			            }
+			
+			            aphidModel.remove(fromIndex);
+			            aphidModel.add(toIndex, data);
+			
+			            return true; 
+			        }
+			
+				        catch (Exception e) 
+				        {
+				            e.printStackTrace();
+				        }
+			
+			        return false; 
+			}
+		    private static Object BorderLayout() 
+		    {
+				return null; 
+		    }
+		});
+	}
 }
