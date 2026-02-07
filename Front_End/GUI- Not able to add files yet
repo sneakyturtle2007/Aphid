@@ -1,0 +1,166 @@
+import javax.swing.* ;
+import java.awt.* ;
+import java.awt.datatransfer.*;
+
+public class AphidGUI {
+
+// Storage model
+private static DefaultListModel<String> aphidModel = new DefaultListModel<>();
+
+public static void main(String[] args) 
+{
+
+// Frames
+	JFrame frame = new JFrame("Aphid Storage Manager");
+	frame.setSize(500, 300);
+	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	frame.setLayout(new BorderLayout());
+	
+// Main background color
+    Color backgroundGreen = new Color(220, 245, 220);
+    frame.getContentPane().setBackground(backgroundGreen);
+	
+// Title
+	JLabel titleLabel = new JLabel("Aphid Storage Manager", JLabel.CENTER);
+	titleLabel.setFont(new Font("Comic Sans MS", Font.BOLD, 18));
+	
+    titleLabel.setOpaque(true);
+    titleLabel.setBackground(backgroundGreen);
+    frame.add(titleLabel, BorderLayout.NORTH);
+
+// Aphid list
+    JList<String> aphidList = new JList<>(aphidModel);
+    aphidList.setFont(new Font("Comic Sans MS", Font.PLAIN, 14));
+    aphidList.setBackground(new Color(235, 250, 235));
+    aphidList.setSelectionBackground(new Color(100, 170, 100));
+    aphidList.setSelectionForeground(Color.WHITE);
+
+    JScrollPane scrollPane = new JScrollPane(aphidList);
+    frame.add(scrollPane, BorderLayout.CENTER);
+
+// Input field
+    JTextField aphidField = new JTextField();
+    aphidField.setFont(new Font("Comic Sans MS", Font.PLAIN, 14));
+    aphidField.setBackground(Color.BLACK);
+
+ //Buttons
+    JButton storeButton = new JButton("Store Aphid");
+    storeButton.setBackground(new Color(90, 180, 90));
+    storeButton.setForeground(Color.BLACK);
+    storeButton.setFocusPainted(false);
+
+    JButton releaseButton = new JButton("Release Aphid");
+    releaseButton.setBackground(new Color(190, 80, 80));
+    releaseButton.setForeground(Color.BLACK);
+    releaseButton.setFocusPainted(false);
+
+    // Button actions
+    storeButton.addActionListener(e -> {
+        String aphid = aphidField.getText().trim();
+        if (!aphid.isEmpty()) {
+            aphidModel.addElement(aphid);
+            aphidField.setText("");
+        }
+    });
+
+    releaseButton.addActionListener(e -> {
+        int selectedIndex = aphidList.getSelectedIndex();
+        if (selectedIndex != -1) {
+            aphidModel.remove(selectedIndex);
+        }
+    });
+
+ // Bottom panel
+    JPanel bottomPanel = new JPanel(new GridLayout(3, 1, 8, 8));
+    bottomPanel.setBackground(backgroundGreen);
+    bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+    bottomPanel.add(aphidField);
+    bottomPanel.add(storeButton);
+    bottomPanel.add(releaseButton);
+
+    frame.add(bottomPanel, BorderLayout.SOUTH);
+
+    frame.setVisible(true);
+
+aphidList.setDragEnabled(true);
+aphidList.setDropMode(DropMode.INSERT);
+aphidList.setTransferHandler(new TransferHandler() 
+	{
+	
+	    private int fromIndex = -1; 
+	
+	    @Override
+	    protected Transferable createTransferable(JComponent c) {
+	        JList<?> list = (JList<?>) c;
+	        fromIndex = list.getSelectedIndex();
+	
+	        if (fromIndex < 0) 
+	        {
+	            return null;
+	        }
+	
+	        Object value = list.getSelectedValue();
+	        return new StringSelection(value.toString());
+	    }
+	
+	    @Override
+	    public int getSourceActions(JComponent c) {
+	        return MOVE;
+	    }
+	
+	    @Override
+	    public boolean canImport(TransferSupport support) {
+	        return support.isDrop()
+	                && support.isDataFlavorSupported(DataFlavor.stringFlavor);
+	    }
+	
+	    @Override
+	    public boolean importData(TransferSupport support) 
+		    {
+			        if (!canImport(support) || fromIndex < 0) 
+			        {
+			            return false;
+			        }
+			
+			        try 
+			        {
+			            JList.DropLocation location =
+			                    (JList.DropLocation) support.getDropLocation();
+			            int toIndex = location.getIndex();
+			
+			            // Prevent index out of bounds
+			            if (toIndex < 0 || toIndex > aphidModel.size()) 
+			            {
+			                return false;
+			            }
+			
+			            String data = (String) support.getTransferable()
+			                    .getTransferData(DataFlavor.stringFlavor);
+			
+			            // Adjust index if moving downward
+			            if (fromIndex < toIndex) 
+			            {
+			                toIndex--;
+			            }
+			
+			            aphidModel.remove(fromIndex);
+			            aphidModel.add(toIndex, data);
+			
+			            return true; 
+			        }
+			
+				        catch (Exception e) 
+				        {
+				            e.printStackTrace();
+				        }
+			
+			        return false; 
+			}
+		    private static Object BorderLayout() 
+		    {
+				return null; 
+		    }
+		});
+	}
+}
