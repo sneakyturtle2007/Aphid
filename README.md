@@ -1,2 +1,2 @@
-# AntHive
-An encrypted decentralized storage network of devices with AntHive installed.
+# Aphid
+An encrypted decentralized storage network of devices with Aphid installed.
