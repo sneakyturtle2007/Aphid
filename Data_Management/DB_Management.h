@@ -23,11 +23,12 @@ typedef struct{
 
 typedef struct{
   char *username;
-  char *blob;
+  unsigned char *blob;
+  uint32_t size;
 }DataBlob;
 
 static Error Start_DB(sqlite3 **db);
-static Error Insert_Storage_Blob(sqlite3 **db, char* username, char *data);
+static Error Insert_Storage_Blob(sqlite3 **db, DataBlob *data);
 static Error Get_Storage_Blob(sqlite3 **db, DataBlob *blob, char* username);
 static Error Insert_File_Aliases(sqlite3 **db, char* file_name, int file_size, char* aphid_path);
 static Error Get_File_Alias(sqlite3 **db, AliasList* aliases);
