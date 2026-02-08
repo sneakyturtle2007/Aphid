@@ -4,9 +4,32 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
 #include "sqlite3.h"
 #include "../Error_Handling/Error_Handling.h"
 
+typedef struct{
+  char* name;
+  uint32_t file_size;
+  char* aphid_path;
+}Alias;
+
+typedef struct{
+  Alias* aliases;
+  int count;
+  int capacity;
+}AliasList;
+
+typedef struct{
+  char *username;
+  char *blob;
+}DataBlob;
+
 static Error Start_DB(sqlite3 **db);
+static Error Insert_Storage_Blob(sqlite3 **db, char* username, char *data);
+static Error Get_Storage_Blob(sqlite3 **db, DataBlob *blob, char* username);
+static Error Insert_File_Aliases(sqlite3 **db, char* file_name, int file_size, char* aphid_path);
+static Error Get_File_Alias(sqlite3 **db, AliasList* aliases);
 
 #endif // DB_Management_H
